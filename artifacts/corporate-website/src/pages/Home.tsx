@@ -1,194 +1,633 @@
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform, useMotionValue, useSpring, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
-import { ArrowRight, Building2, Globe2, Users, TrendingUp, ShieldCheck } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import {
+  ArrowRight, Building2, Globe2, Users, TrendingUp, ShieldCheck,
+  Zap, Truck, Leaf, ChevronDown
+} from "lucide-react";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { AnimatedCounter } from "@/components/ui/AnimatedCounter";
 
-const sectors = [
-  { name: "Real Estate", icon: Building2, desc: "Premium commercial and residential developments across 12 countries.", img: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=800" },
-  { name: "Financial Services", icon: TrendingUp, desc: "Wealth management, corporate banking, and investment strategies.", img: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&q=80&w=800" },
-  { name: "Technology & Innovation", icon: Globe2, desc: "Pioneering enterprise software and AI-driven business solutions.", img: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800" },
+// ── Floating Particle ──────────────────────────────────────────────────────
+function Particle({ index }: { index: number }) {
+  const size = Math.random() * 3 + 1;
+  const x = Math.random() * 100;
+  const duration = Math.random() * 12 + 8;
+  const delay = Math.random() * 6;
+  const opacity = Math.random() * 0.5 + 0.1;
+
+  return (
+    <motion.div
+      className="absolute rounded-full bg-primary pointer-events-none"
+      style={{ width: size, height: size, left: `${x}%`, bottom: "-10px", opacity }}
+      animate={{ y: [0, -(Math.random() * 600 + 300)], opacity: [opacity, 0] }}
+      transition={{ duration, delay, repeat: Infinity, ease: "linear" }}
+    />
+  );
+}
+
+// ── Glowing Orb ────────────────────────────────────────────────────────────
+function GlowOrb({ x, y, size, color, delay }: { x: string; y: string; size: number; color: string; delay: number }) {
+  return (
+    <motion.div
+      className="absolute rounded-full blur-3xl pointer-events-none"
+      style={{ left: x, top: y, width: size, height: size, background: color, opacity: 0.15 }}
+      animate={{ scale: [1, 1.3, 1], opacity: [0.1, 0.22, 0.1] }}
+      transition={{ duration: 6, delay, repeat: Infinity, ease: "easeInOut" }}
+    />
+  );
+}
+
+// ── Animated Grid Lines ────────────────────────────────────────────────────
+function GridLines() {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ opacity: 0.07 }}>
+      <svg width="100%" height="100%">
+        <defs>
+          <pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse">
+            <path d="M 80 0 L 0 0 0 80" fill="none" stroke="hsl(var(--primary))" strokeWidth="0.5" />
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#grid)" />
+      </svg>
+    </div>
+  );
+}
+
+// ── Typewriter cycling text ────────────────────────────────────────────────
+const WORDS = ["Real Estate", "Technology", "Logistics", "Finance", "Construction", "Energy"];
+
+function TypewriterCycle() {
+  const [wordIndex, setWordIndex] = useState(0);
+  const [displayed, setDisplayed] = useState("");
+  const [phase, setPhase] = useState<"typing" | "pause" | "deleting">("typing");
+
+  useEffect(() => {
+    const word = WORDS[wordIndex];
+    let timeout: ReturnType<typeof setTimeout>;
+
+    if (phase === "typing") {
+      if (displayed.length < word.length) {
+        timeout = setTimeout(() => setDisplayed(word.slice(0, displayed.length + 1)), 90);
+      } else {
+        timeout = setTimeout(() => setPhase("pause"), 1400);
+      }
+    } else if (phase === "pause") {
+      timeout = setTimeout(() => setPhase("deleting"), 800);
+    } else {
+      if (displayed.length > 0) {
+        timeout = setTimeout(() => setDisplayed(displayed.slice(0, -1)), 50);
+      } else {
+        setWordIndex((i) => (i + 1) % WORDS.length);
+        setPhase("typing");
+      }
+    }
+
+    return () => clearTimeout(timeout);
+  }, [displayed, phase, wordIndex]);
+
+  return (
+    <span className="text-gradient-gold inline-block min-w-[4ch]">
+      {displayed}
+      <motion.span
+        className="inline-block w-[3px] h-[0.85em] bg-primary ml-1 align-middle"
+        animate={{ opacity: [1, 0] }}
+        transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
+      />
+    </span>
+  );
+}
+
+// ── Marquee ticker ─────────────────────────────────────────────────────────
+const TICKER_ITEMS = [
+  "Real Estate", "•", "Logistics & Supply Chain", "•", "Technology & AI", "•",
+  "Construction", "•", "Financial Services", "•", "Energy & Resources", "•",
+  "45,000+ Employees", "•", "32 Countries", "•", "75 Years of Excellence", "•",
 ];
 
+function MarqueeTicker() {
+  const items = [...TICKER_ITEMS, ...TICKER_ITEMS];
+  return (
+    <div className="overflow-hidden border-y border-primary/20 bg-primary/5 py-3">
+      <motion.div
+        className="flex gap-8 whitespace-nowrap"
+        animate={{ x: ["0%", "-50%"] }}
+        transition={{ duration: 28, repeat: Infinity, ease: "linear" }}
+      >
+        {items.map((item, i) => (
+          <span
+            key={i}
+            className={item === "•" ? "text-primary text-lg" : "text-xs tracking-widest uppercase text-muted-foreground font-medium"}
+          >
+            {item}
+          </span>
+        ))}
+      </motion.div>
+    </div>
+  );
+}
+
+// ── Sector card with animated border trace ─────────────────────────────────
+const sectors = [
+  { name: "Real Estate", icon: Building2, color: "#d4af37", desc: "Premium commercial and residential developments across 12 countries.", img: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=800" },
+  { name: "Financial Services", icon: TrendingUp, color: "#38bdf8", desc: "Wealth management, corporate banking, and investment strategies.", img: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&q=80&w=800" },
+  { name: "Technology & Innovation", icon: Zap, color: "#a78bfa", desc: "Pioneering enterprise software and AI-driven business solutions.", img: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800" },
+  { name: "Logistics & Supply Chain", icon: Truck, color: "#34d399", desc: "End-to-end global logistics networks spanning 4 continents.", img: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=800" },
+  { name: "Construction", icon: Globe2, color: "#fb923c", desc: "Landmark infrastructure projects redefining skylines worldwide.", img: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&q=80&w=800" },
+  { name: "Energy & Resources", icon: Leaf, color: "#4ade80", desc: "Sustainable energy solutions powering the transition to net-zero.", img: "https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?auto=format&fit=crop&q=80&w=800" },
+];
+
+// ── Stat card with pulse ring ──────────────────────────────────────────────
+function StatCard({ label, value, prefix, suffix, delay, icon: Icon }: {
+  label: string; value: number; prefix?: string; suffix?: string; delay: number; icon: React.ElementType;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6, delay }}
+      className="relative flex flex-col items-center text-center py-8 px-4 group"
+    >
+      <div className="relative mb-4">
+        <motion.div
+          className="absolute inset-0 rounded-full bg-primary/20"
+          animate={{ scale: [1, 1.6, 1], opacity: [0.4, 0, 0.4] }}
+          transition={{ duration: 2.5, delay, repeat: Infinity }}
+        />
+        <div className="relative w-14 h-14 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center text-primary group-hover:bg-primary/20 transition-colors">
+          <Icon size={22} />
+        </div>
+      </div>
+      <div className="text-3xl md:text-4xl font-bold text-primary mb-1">
+        <AnimatedCounter from={0} to={value} prefix={prefix} suffix={suffix} duration={2.5} />
+      </div>
+      <div className="text-sm text-muted-foreground tracking-wide">{label}</div>
+    </motion.div>
+  );
+}
+
+// ── Main Component ─────────────────────────────────────────────────────────
 export default function Home() {
+  const heroRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
+
+  const heroY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
+
+  const particles = Array.from({ length: 28 }, (_, i) => i);
+
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <img 
+
+      {/* ── HERO ──────────────────────────────────────────────────── */}
+      <section ref={heroRef} className="relative h-screen flex items-center justify-center overflow-hidden">
+
+        {/* Layered background */}
+        <motion.div className="absolute inset-0 z-0" style={{ y: heroY }}>
+          <img
             src={`${import.meta.env.BASE_URL}images/hero-bg.png`}
-            alt="Corporate Hero Background" 
-            className="w-full h-full object-cover opacity-60"
+            alt="Hero background"
+            className="w-full h-full object-cover opacity-50"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/60 to-background" />
+        </motion.div>
+
+        {/* Grid lines */}
+        <div className="absolute inset-0 z-1">
+          <GridLines />
         </div>
-        
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center mt-20">
+
+        {/* Glowing orbs */}
+        <div className="absolute inset-0 z-1 pointer-events-none">
+          <GlowOrb x="10%" y="20%" size={400} color="#d4af37" delay={0} />
+          <GlowOrb x="70%" y="50%" size={350} color="#6366f1" delay={2} />
+          <GlowOrb x="40%" y="70%" size={300} color="#d4af37" delay={4} />
+        </div>
+
+        {/* Floating particles */}
+        <div className="absolute inset-0 z-2 overflow-hidden pointer-events-none">
+          {particles.map((i) => <Particle key={i} index={i} />)}
+        </div>
+
+        {/* Hero content */}
+        <motion.div
+          style={{ opacity: heroOpacity }}
+          className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center mt-20"
+        >
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <span className="inline-block py-1 px-3 rounded-full border border-primary/30 bg-primary/10 text-primary text-xs font-semibold tracking-widest uppercase mb-6">
+            <span className="inline-block py-1 px-4 rounded-full border border-primary/40 bg-primary/10 text-primary text-xs font-semibold tracking-widest uppercase mb-8">
               Empowering Global Progress
             </span>
           </motion.div>
-          
-          <motion.h1 
-            initial={{ opacity: 0, y: 30 }}
+
+          <motion.h1
+            initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
+            transition={{ duration: 0.9, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
             className="text-5xl md:text-7xl lg:text-8xl font-display font-bold text-foreground mb-6 leading-tight"
           >
             Building the <br />
-            <span className="text-gradient-gold">Future of Industry</span>
+            Future of{" "}
+            <TypewriterCycle />
           </motion.h1>
-          
-          <motion.p 
+
+          <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
+            transition={{ duration: 0.8, delay: 0.7 }}
             className="mt-6 text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed"
           >
-            Aegis Group is a diversified global conglomerate driving sustainable growth, innovation, and excellence across real estate, finance, technology, and infrastructure.
+            Aegis Group is a diversified global conglomerate driving sustainable growth,
+            innovation, and excellence across real estate, finance, technology, and infrastructure.
           </motion.p>
-          
-          <motion.div 
+
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.8 }}
+            transition={{ duration: 0.8, delay: 0.9 }}
             className="mt-10 flex flex-col sm:flex-row justify-center gap-4"
           >
-            <Link href="/sectors" className="px-8 py-4 bg-primary text-primary-foreground font-semibold rounded-sm hover:bg-primary/90 transition-all hover:shadow-[0_0_20px_rgba(212,175,55,0.3)]">
-              Explore Our Sectors
-            </Link>
-            <Link href="/about" className="px-8 py-4 bg-transparent border border-border text-foreground font-semibold rounded-sm hover:border-primary hover:text-primary transition-all">
-              Discover Our History
-            </Link>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
+              <Link href="/sectors" className="block px-8 py-4 bg-primary text-primary-foreground font-semibold rounded-sm hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] transition-shadow">
+                Explore Our Sectors
+              </Link>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
+              <Link href="/about" className="block px-8 py-4 bg-transparent border border-border text-foreground font-semibold rounded-sm hover:border-primary hover:text-primary transition-colors">
+                Discover Our History
+              </Link>
+            </motion.div>
+          </motion.div>
+
+          {/* Scroll indicator */}
+          <motion.div
+            className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-muted-foreground cursor-pointer"
+            animate={{ y: [0, 8, 0] }}
+            transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <span className="text-xs tracking-widest uppercase">Scroll</span>
+            <ChevronDown size={18} className="text-primary" />
+          </motion.div>
+        </motion.div>
+      </section>
+
+      {/* ── TICKER ────────────────────────────────────────────────── */}
+      <MarqueeTicker />
+
+      {/* ── STATS ─────────────────────────────────────────────────── */}
+      <section className="py-24 relative overflow-hidden">
+        <div className="absolute inset-0 bg-secondary/40" />
+        <motion.div
+          className="absolute inset-0 pointer-events-none"
+          animate={{ backgroundPosition: ["0% 0%", "100% 100%"] }}
+          transition={{ duration: 20, repeat: Infinity, repeatType: "reverse", ease: "linear" }}
+          style={{
+            backgroundImage: "radial-gradient(circle at 20% 50%, rgba(212,175,55,0.06) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(99,102,241,0.05) 0%, transparent 50%)",
+            backgroundSize: "200% 200%"
+          }}
+        />
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-border">
+            <StatCard label="Global Employees" value={45000} suffix="+" delay={0} icon={Users} />
+            <StatCard label="Countries Present" value={32} delay={0.15} icon={Globe2} />
+            <StatCard label="Years of Excellence" value={75} delay={0.3} icon={ShieldCheck} />
+            <StatCard label="Annual Revenue" value={12} prefix="$" suffix="B+" delay={0.45} icon={TrendingUp} />
+          </div>
+        </div>
+      </section>
+
+      {/* ── SECTORS GRID ──────────────────────────────────────────── */}
+      <section className="py-32 relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <GlowOrb x="80%" y="10%" size={500} color="#d4af37" delay={1} />
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <SectionHeading title="Our Core Sectors" subtitle="Diversified Excellence" />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-16">
+            {sectors.map((sector, i) => (
+              <motion.div
+                key={sector.name}
+                initial={{ opacity: 0, y: 50, rotateX: 8 }}
+                whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ duration: 0.6, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
+                whileHover={{ y: -6, transition: { duration: 0.25 } }}
+                className="group relative rounded-xl overflow-hidden bg-card border border-border hover:border-primary/60 transition-colors cursor-pointer"
+                style={{ transformStyle: "preserve-3d" }}
+              >
+                {/* Image with Ken-Burns zoom */}
+                <div className="h-52 overflow-hidden relative">
+                  <motion.img
+                    src={sector.img}
+                    alt={sector.name}
+                    className="w-full h-full object-cover"
+                    initial={{ scale: 1.1 }}
+                    whileInView={{ scale: 1 }}
+                    whileHover={{ scale: 1.08 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.8 }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />
+
+                  {/* Glowing accent corner */}
+                  <motion.div
+                    className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center"
+                    style={{ background: `${sector.color}22`, border: `1px solid ${sector.color}55` }}
+                    whileHover={{ scale: 1.2 }}
+                  >
+                    <sector.icon size={14} style={{ color: sector.color }} />
+                  </motion.div>
+                </div>
+
+                <div className="p-6">
+                  {/* Animated icon */}
+                  <motion.div
+                    className="w-10 h-10 rounded-lg flex items-center justify-center mb-4"
+                    style={{ background: `${sector.color}18`, border: `1px solid ${sector.color}33` }}
+                    whileHover={{ rotate: 10, scale: 1.1 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <sector.icon size={18} style={{ color: sector.color }} />
+                  </motion.div>
+
+                  <h3 className="text-lg font-bold mb-2 text-foreground group-hover:text-primary transition-colors">
+                    {sector.name}
+                  </h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed mb-4">{sector.desc}</p>
+
+                  <Link href="/sectors" className="inline-flex items-center text-sm text-primary font-medium">
+                    Explore
+                    <motion.span
+                      className="ml-1"
+                      animate={{ x: [0, 3, 0] }}
+                      transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                    >
+                      <ArrowRight size={14} />
+                    </motion.span>
+                  </Link>
+                </div>
+
+                {/* Animated bottom border on hover */}
+                <motion.div
+                  className="absolute bottom-0 left-0 h-0.5"
+                  style={{ background: sector.color }}
+                  initial={{ width: "0%" }}
+                  whileHover={{ width: "100%" }}
+                  transition={{ duration: 0.35 }}
+                />
+              </motion.div>
+            ))}
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="mt-16 text-center"
+          >
+            <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
+              <Link href="/sectors" className="inline-flex items-center gap-2 px-8 py-3 border border-border rounded-sm hover:border-primary text-foreground hover:text-primary transition-colors">
+                View All Sectors
+                <ArrowRight size={16} />
+              </Link>
+            </motion.div>
           </motion.div>
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-20 bg-secondary/50 border-y border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 divide-x divide-border">
-            {[
-              { label: "Global Employees", value: 45000, suffix: "+" },
-              { label: "Countries Present", value: 32, suffix: "" },
-              { label: "Years of Excellence", value: 75, suffix: "" },
-              { label: "Annual Revenue", value: 12.4, prefix: "$", suffix: "B" }
-            ].map((stat, i) => (
-              <div key={i} className="text-center px-4">
-                <div className="text-3xl md:text-5xl font-display font-bold text-primary mb-2">
-                  <AnimatedCounter from={0} to={stat.value} prefix={stat.prefix} suffix={stat.suffix} duration={2.5} />
-                </div>
-                <div className="text-sm md:text-base text-muted-foreground tracking-wide">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Sectors */}
-      <section className="py-32 relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <SectionHeading title="Our Core Sectors" subtitle="Diversified Excellence" />
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
-            {sectors.map((sector, i) => (
-              <motion.div
-                key={sector.name}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="group relative rounded-xl overflow-hidden bg-card border border-border hover:border-primary/50 transition-colors"
-              >
-                <div className="h-64 overflow-hidden relative">
-                  <div className="absolute inset-0 bg-background/20 group-hover:bg-transparent transition-colors z-10" />
-                  <img src={sector.img} alt={sector.name} className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" />
-                </div>
-                <div className="p-8 relative z-20 bg-card">
-                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform">
-                    <sector.icon size={24} />
-                  </div>
-                  <h3 className="text-2xl font-display font-bold mb-3 text-foreground">{sector.name}</h3>
-                  <p className="text-muted-foreground mb-6 leading-relaxed">
-                    {sector.desc}
-                  </p>
-                  <Link href="/sectors" className="inline-flex items-center text-primary font-medium group/link">
-                    Explore Sector
-                    <ArrowRight size={16} className="ml-2 transform group-hover/link:translate-x-1 transition-transform" />
-                  </Link>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-          
-          <div className="mt-16 text-center">
-            <Link href="/sectors" className="inline-flex items-center gap-2 px-8 py-3 border border-border rounded-sm hover:border-primary text-foreground transition-colors">
-              View All Sectors
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Brief About / Values */}
+      {/* ── VALUES / ABOUT SPLIT ──────────────────────────────────── */}
       <section className="py-32 bg-secondary relative overflow-hidden">
-        <div className="absolute top-1/2 left-0 w-1/2 h-full bg-primary/5 blur-[100px] -translate-y-1/2" />
-        
+        {/* Animated gradient sweep */}
+        <motion.div
+          className="absolute inset-0 pointer-events-none"
+          animate={{ x: ["−20%", "120%"] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+          style={{
+            background: "linear-gradient(90deg, transparent, rgba(212,175,55,0.04), transparent)",
+            width: "60%",
+          }}
+        />
+        <GlowOrb x="0%" y="30%" size={450} color="#d4af37" delay={0} />
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
+
+            {/* Left: Text */}
             <motion.div
-              initial={{ opacity: 0, x: -30 }}
+              initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
+              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
             >
-              <span className="text-primary tracking-widest font-semibold text-sm uppercase mb-4 block">Our Foundation</span>
-              <h2 className="text-4xl md:text-5xl font-display text-foreground mb-6">Governed by Integrity, Driven by Vision.</h2>
+              <motion.span
+                className="text-primary tracking-widest font-semibold text-xs uppercase mb-4 block"
+                initial={{ opacity: 0, letterSpacing: "0.05em" }}
+                whileInView={{ opacity: 1, letterSpacing: "0.2em" }}
+                viewport={{ once: true }}
+                transition={{ duration: 1 }}
+              >
+                Our Foundation
+              </motion.span>
+
+              <h2 className="text-4xl md:text-5xl font-display text-foreground mb-6 leading-tight">
+                Governed by Integrity,<br />
+                <span className="text-gradient-gold">Driven by Vision.</span>
+              </h2>
               <p className="text-muted-foreground text-lg mb-8 leading-relaxed">
-                For over seven decades, Aegis Group has built its legacy on unyielding principles. We believe that true value is created not just through financial returns, but through positive impact on communities, environments, and economies.
+                For over seven decades, Aegis Group has built its legacy on unyielding principles. True value is created not just through financial returns, but through positive impact on communities, environments, and economies.
               </p>
+
               <ul className="space-y-4 mb-10">
-                {["Sustainable growth strategies", "Uncompromising ethical standards", "Commitment to community development"].map((item, i) => (
-                  <li key={i} className="flex items-center gap-3 text-foreground">
-                    <ShieldCheck className="text-primary" size={20} />
+                {[
+                  "Sustainable growth strategies",
+                  "Uncompromising ethical standards",
+                  "Commitment to community development"
+                ].map((item, i) => (
+                  <motion.li
+                    key={i}
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.1 * i + 0.3, duration: 0.5 }}
+                    className="flex items-center gap-3 text-foreground"
+                  >
+                    <motion.div
+                      animate={{ rotate: [0, 360] }}
+                      transition={{ duration: 6, delay: i * 0.8, repeat: Infinity, ease: "linear" }}
+                    >
+                      <ShieldCheck className="text-primary flex-shrink-0" size={20} />
+                    </motion.div>
                     <span>{item}</span>
-                  </li>
+                  </motion.li>
                 ))}
               </ul>
-              <Link href="/about" className="px-8 py-4 bg-foreground text-background font-semibold rounded-sm hover:bg-primary transition-colors">
-                Learn About Our Heritage
-              </Link>
+
+              <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
+                <Link href="/about" className="inline-block px-8 py-4 bg-foreground text-background font-semibold rounded-sm hover:bg-primary transition-colors">
+                  Learn About Our Heritage
+                </Link>
+              </motion.div>
             </motion.div>
-            
+
+            {/* Right: Image with reveal overlay */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
+              initial={{ opacity: 0, scale: 0.92 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
+              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
               className="relative"
             >
-              {/* corporate architecture image */}
-              <div className="rounded-2xl overflow-hidden border border-border relative">
-                <div className="absolute inset-0 border border-primary/20 rounded-2xl z-20 pointer-events-none" />
-                <img 
-                  src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1200" 
-                  alt="Aegis Headquarters" 
-                  className="w-full h-[600px] object-cover hover:scale-105 transition-transform duration-1000"
+              <div className="rounded-2xl overflow-hidden border border-border relative group">
+                {/* Reveal overlay */}
+                <motion.div
+                  className="absolute inset-0 bg-primary z-20 origin-left"
+                  initial={{ scaleX: 1 }}
+                  whileInView={{ scaleX: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.85, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                />
+                <img
+                  src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1200"
+                  alt="Aegis Headquarters"
+                  className="w-full h-[500px] object-cover group-hover:scale-105 transition-transform duration-1000"
+                />
+                {/* Glowing border pulse */}
+                <motion.div
+                  className="absolute inset-0 border-2 border-primary/30 rounded-2xl pointer-events-none"
+                  animate={{ opacity: [0.3, 0.8, 0.3] }}
+                  transition={{ duration: 2.5, repeat: Infinity }}
                 />
               </div>
-              <div className="absolute -bottom-8 -left-8 bg-card border border-border p-8 rounded-xl shadow-2xl max-w-xs shimmer-effect">
-                <div className="text-4xl font-display text-primary mb-2">"</div>
-                <p className="text-foreground italic relative z-10">
+
+              {/* Floating quote badge */}
+              <motion.div
+                className="absolute -bottom-8 -left-8 bg-card border border-border p-6 rounded-xl shadow-2xl max-w-xs z-30"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.6, duration: 0.6 }}
+                whileHover={{ scale: 1.03 }}
+              >
+                <motion.div
+                  className="text-4xl font-display text-primary mb-2 leading-none"
+                  animate={{ y: [0, -4, 0] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  "
+                </motion.div>
+                <p className="text-foreground text-sm italic">
                   Building lasting legacy through visionary investments and operational excellence.
                 </p>
-              </div>
+              </motion.div>
+
+              {/* Floating KPI badge */}
+              <motion.div
+                className="absolute -top-6 -right-6 bg-primary/10 border border-primary/30 backdrop-blur-sm p-4 rounded-xl shadow-lg z-30 hidden md:block"
+                initial={{ opacity: 0, scale: 0.8 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.8, duration: 0.5 }}
+                animate={{ y: [0, -6, 0] }}
+              >
+                <motion.p
+                  className="text-2xl font-bold text-primary"
+                  animate={{ y: [0, -6, 0] }}
+                  transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  #1
+                </motion.p>
+                <p className="text-xs text-muted-foreground mt-1">Ranked Conglomerate</p>
+              </motion.div>
             </motion.div>
           </div>
+        </div>
+      </section>
+
+      {/* ── PARTNER LOGOS STRIP ───────────────────────────────────── */}
+      <section className="py-16 border-t border-border overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="text-center text-xs tracking-widest uppercase text-muted-foreground mb-8"
+          >
+            Trusted By Global Leaders
+          </motion.p>
+
+          <div className="overflow-hidden">
+            <motion.div
+              className="flex gap-16 items-center"
+              animate={{ x: ["0%", "-50%"] }}
+              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+            >
+              {[...Array(10)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="flex-shrink-0 h-8 px-6 rounded-md bg-muted/40 border border-border flex items-center justify-center text-xs text-muted-foreground tracking-widest uppercase font-medium min-w-[120px]"
+                  whileHover={{ scale: 1.08, borderColor: "rgba(212,175,55,0.5)" }}
+                  transition={{ duration: 0.2 }}
+                >
+                  Partner {i + 1}
+                </motion.div>
+              ))}
+              {[...Array(10)].map((_, i) => (
+                <motion.div
+                  key={`dup-${i}`}
+                  className="flex-shrink-0 h-8 px-6 rounded-md bg-muted/40 border border-border flex items-center justify-center text-xs text-muted-foreground tracking-widest uppercase font-medium min-w-[120px]"
+                  whileHover={{ scale: 1.08, borderColor: "rgba(212,175,55,0.5)" }}
+                  transition={{ duration: 0.2 }}
+                >
+                  Partner {i + 1}
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── CALL TO ACTION ────────────────────────────────────────── */}
+      <section className="relative py-32 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-background" />
+        <GlowOrb x="50%" y="50%" size={600} color="#d4af37" delay={0} />
+
+        <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7 }}
+          >
+            <span className="inline-block py-1 px-4 rounded-full border border-primary/30 bg-primary/10 text-primary text-xs font-semibold tracking-widest uppercase mb-6">
+              Partner With Us
+            </span>
+            <h2 className="text-4xl md:text-5xl font-display font-bold text-foreground mb-6">
+              Ready to Build the <span className="text-gradient-gold">Future Together?</span>
+            </h2>
+            <p className="text-lg text-muted-foreground mb-10">
+              Whether you're an investor, partner, or talent looking to make an impact — Aegis Group opens doors to extraordinary opportunity.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
+                <Link href="/contact" className="block px-10 py-4 bg-primary text-primary-foreground font-semibold rounded-sm hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] transition-shadow">
+                  Contact Us
+                </Link>
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
+                <Link href="/careers" className="block px-10 py-4 border border-border text-foreground font-semibold rounded-sm hover:border-primary hover:text-primary transition-colors">
+                  Join Our Team
+                </Link>
+              </motion.div>
+            </div>
+          </motion.div>
         </div>
       </section>
     </div>
