@@ -285,6 +285,22 @@ const sectors = [
   },
 ];
 
+// ── Partner data ───────────────────────────────────────────────────────────
+const PARTNERS = [
+  { logo: "🏦", name: "Meridian Capital Group", sector: "Investment Banking" },
+  { logo: "🏗️", name: "CoreBuilt International", sector: "Construction" },
+  { logo: "⚡", name: "VoltNexus Energy", sector: "Renewable Energy" },
+  { logo: "🌐", name: "SkyLink Technologies", sector: "Technology" },
+  { logo: "🚢", name: "BlueTide Logistics", sector: "Supply Chain" },
+  { logo: "🏢", name: "Pinnacle Real Estate", sector: "Property Development" },
+  { logo: "📊", name: "Apex Financial Services", sector: "Wealth Management" },
+  { logo: "🔬", name: "NovaTech Innovations", sector: "R&D & AI" },
+  { logo: "✈️", name: "GlobalAir Freight", sector: "Aerospace Logistics" },
+  { logo: "🏭", name: "Ironclad Industries", sector: "Manufacturing" },
+  { logo: "🌿", name: "GreenRoot Sustainability", sector: "ESG & CSR" },
+  { logo: "💎", name: "Sterling Ventures", sector: "Private Equity" },
+];
+
 // ── Stat card with pulse ring ──────────────────────────────────────────────
 function StatCard({ label, value, prefix, suffix, delay, icon: Icon }: {
   label: string; value: number; prefix?: string; suffix?: string; delay: number; icon: React.ElementType;
@@ -695,35 +711,29 @@ export default function Home() {
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            className="text-center text-xs tracking-widest uppercase text-muted-foreground mb-8"
+            className="text-center text-xs tracking-widest uppercase text-muted-foreground mb-10"
           >
             Trusted By Global Leaders
           </motion.p>
 
-          <div className="overflow-hidden">
+          <div className="overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
             <motion.div
-              className="flex gap-16 items-center"
+              className="flex gap-6 items-center"
               animate={{ x: ["0%", "-50%"] }}
-              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+              transition={{ duration: 32, repeat: Infinity, ease: "linear" }}
             >
-              {[...Array(10)].map((_, i) => (
+              {[...PARTNERS, ...PARTNERS].map((partner, i) => (
                 <motion.div
                   key={i}
-                  className="flex-shrink-0 h-8 px-6 rounded-md bg-muted/40 border border-border flex items-center justify-center text-xs text-muted-foreground tracking-widest uppercase font-medium min-w-[120px]"
-                  whileHover={{ scale: 1.08, borderColor: "rgba(212,175,55,0.5)" }}
-                  transition={{ duration: 0.2 }}
+                  className="flex-shrink-0 flex items-center gap-2.5 px-5 py-3 rounded-lg bg-muted/30 border border-border/60 cursor-default select-none"
+                  whileHover={{ scale: 1.06, borderColor: "rgba(212,175,55,0.45)", backgroundColor: "rgba(212,175,55,0.06)" }}
+                  transition={{ duration: 0.18 }}
                 >
-                  Partner {i + 1}
-                </motion.div>
-              ))}
-              {[...Array(10)].map((_, i) => (
-                <motion.div
-                  key={`dup-${i}`}
-                  className="flex-shrink-0 h-8 px-6 rounded-md bg-muted/40 border border-border flex items-center justify-center text-xs text-muted-foreground tracking-widest uppercase font-medium min-w-[120px]"
-                  whileHover={{ scale: 1.08, borderColor: "rgba(212,175,55,0.5)" }}
-                  transition={{ duration: 0.2 }}
-                >
-                  Partner {i + 1}
+                  <span className="text-lg leading-none">{partner.logo}</span>
+                  <div className="flex flex-col leading-tight">
+                    <span className="text-xs font-bold text-foreground/80 whitespace-nowrap">{partner.name}</span>
+                    <span className="text-[10px] text-muted-foreground/60 tracking-wide">{partner.sector}</span>
+                  </div>
                 </motion.div>
               ))}
             </motion.div>
