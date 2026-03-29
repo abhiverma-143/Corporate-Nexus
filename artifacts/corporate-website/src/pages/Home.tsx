@@ -127,14 +127,162 @@ function MarqueeTicker() {
   );
 }
 
+// ── Image Slideshow for sector cards ───────────────────────────────────────
+const SLIDE_EFFECTS = ["crossfade", "slide", "zoom"] as const;
+type SlideEffect = typeof SLIDE_EFFECTS[number];
+
+function SectorSlideshow({ images, color, effect }: { images: string[]; color: string; effect: SlideEffect }) {
+  const [current, setCurrent] = useState(0);
+  const [direction, setDirection] = useState(1);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDirection(1);
+      setCurrent((c) => (c + 1) % images.length);
+    }, 3200 + Math.random() * 800);
+    return () => clearInterval(interval);
+  }, [images.length]);
+
+  const variants = {
+    crossfade: {
+      enter: { opacity: 0, scale: 1.06 },
+      center: { opacity: 1, scale: 1 },
+      exit: { opacity: 0, scale: 0.97 },
+    },
+    slide: {
+      enter: { opacity: 0, x: direction * 80 },
+      center: { opacity: 1, x: 0 },
+      exit: { opacity: 0, x: -direction * 80 },
+    },
+    zoom: {
+      enter: { opacity: 0, scale: 1.2 },
+      center: { opacity: 1, scale: 1 },
+      exit: { opacity: 0, scale: 0.85 },
+    },
+  };
+
+  const v = variants[effect];
+
+  return (
+    <div className="relative h-52 overflow-hidden bg-black">
+      <AnimatePresence mode="sync">
+        <motion.img
+          key={current}
+          src={images[current]}
+          alt="sector"
+          className="absolute inset-0 w-full h-full object-cover"
+          initial={v.enter}
+          animate={v.center}
+          exit={v.exit}
+          transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
+        />
+      </AnimatePresence>
+
+      {/* Gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent pointer-events-none" />
+
+      {/* Dot indicators */}
+      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+        {images.map((_, i) => (
+          <motion.button
+            key={i}
+            onClick={() => { setDirection(i > current ? 1 : -1); setCurrent(i); }}
+            className="rounded-full transition-all"
+            animate={{
+              width: i === current ? 18 : 6,
+              backgroundColor: i === current ? color : "rgba(255,255,255,0.35)",
+            }}
+            style={{ height: 6 }}
+            transition={{ duration: 0.3 }}
+          />
+        ))}
+      </div>
+
+      {/* Image count badge */}
+      <div
+        className="absolute top-3 left-3 text-xs font-medium px-2 py-0.5 rounded-full backdrop-blur-sm z-10"
+        style={{ background: `${color}22`, border: `1px solid ${color}44`, color }}
+      >
+        {current + 1} / {images.length}
+      </div>
+    </div>
+  );
+}
+
 // ── Sector card with animated border trace ─────────────────────────────────
 const sectors = [
-  { name: "Real Estate", icon: Building2, color: "#d4af37", desc: "Premium commercial and residential developments across 12 countries.", img: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=800" },
-  { name: "Financial Services", icon: TrendingUp, color: "#38bdf8", desc: "Wealth management, corporate banking, and investment strategies.", img: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&q=80&w=800" },
-  { name: "Technology & Innovation", icon: Zap, color: "#a78bfa", desc: "Pioneering enterprise software and AI-driven business solutions.", img: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800" },
-  { name: "Logistics & Supply Chain", icon: Truck, color: "#34d399", desc: "End-to-end global logistics networks spanning 4 continents.", img: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=800" },
-  { name: "Construction", icon: Globe2, color: "#fb923c", desc: "Landmark infrastructure projects redefining skylines worldwide.", img: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&q=80&w=800" },
-  { name: "Energy & Resources", icon: Leaf, color: "#4ade80", desc: "Sustainable energy solutions powering the transition to net-zero.", img: "https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?auto=format&fit=crop&q=80&w=800" },
+  {
+    name: "Real Estate",
+    icon: Building2,
+    color: "#d4af37",
+    desc: "Premium commercial and residential developments across 12 countries.",
+    effect: "crossfade" as SlideEffect,
+    images: [
+      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=800",
+      "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=800",
+      "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&q=80&w=800",
+    ],
+  },
+  {
+    name: "Financial Services",
+    icon: TrendingUp,
+    color: "#38bdf8",
+    desc: "Wealth management, corporate banking, and investment strategies.",
+    effect: "slide" as SlideEffect,
+    images: [
+      "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&q=80&w=800",
+      "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&q=80&w=800",
+      "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=80&w=800",
+    ],
+  },
+  {
+    name: "Technology & Innovation",
+    icon: Zap,
+    color: "#a78bfa",
+    desc: "Pioneering enterprise software and AI-driven business solutions.",
+    effect: "zoom" as SlideEffect,
+    images: [
+      "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800",
+      "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=800",
+      "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?auto=format&fit=crop&q=80&w=800",
+    ],
+  },
+  {
+    name: "Logistics & Supply Chain",
+    icon: Truck,
+    color: "#34d399",
+    desc: "End-to-end global logistics networks spanning 4 continents.",
+    effect: "slide" as SlideEffect,
+    images: [
+      "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=800",
+      "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?auto=format&fit=crop&q=80&w=800",
+      "https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&q=80&w=800",
+    ],
+  },
+  {
+    name: "Construction",
+    icon: Globe2,
+    color: "#fb923c",
+    desc: "Landmark infrastructure projects redefining skylines worldwide.",
+    effect: "crossfade" as SlideEffect,
+    images: [
+      "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&q=80&w=800",
+      "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&q=80&w=800",
+      "https://images.unsplash.com/photo-1590012314607-cda9d9b699ae?auto=format&fit=crop&q=80&w=800",
+    ],
+  },
+  {
+    name: "Energy & Resources",
+    icon: Leaf,
+    color: "#4ade80",
+    desc: "Sustainable energy solutions powering the transition to net-zero.",
+    effect: "zoom" as SlideEffect,
+    images: [
+      "https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?auto=format&fit=crop&q=80&w=800",
+      "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&q=80&w=800",
+      "https://images.unsplash.com/photo-1509391111902-de77d589c1f0?auto=format&fit=crop&q=80&w=800",
+    ],
+  },
 ];
 
 // ── Stat card with pulse ring ──────────────────────────────────────────────
@@ -323,23 +471,12 @@ export default function Home() {
                 className="group relative rounded-xl overflow-hidden bg-card border border-border hover:border-primary/60 transition-colors cursor-pointer"
                 style={{ transformStyle: "preserve-3d" }}
               >
-                {/* Image with Ken-Burns zoom */}
-                <div className="h-52 overflow-hidden relative">
-                  <motion.img
-                    src={sector.img}
-                    alt={sector.name}
-                    className="w-full h-full object-cover"
-                    initial={{ scale: 1.1 }}
-                    whileInView={{ scale: 1 }}
-                    whileHover={{ scale: 1.08 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.8 }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />
-
+                {/* Image slideshow */}
+                <div className="relative">
+                  <SectorSlideshow images={sector.images} color={sector.color} effect={sector.effect} />
                   {/* Glowing accent corner */}
                   <motion.div
-                    className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center"
+                    className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center z-20"
                     style={{ background: `${sector.color}22`, border: `1px solid ${sector.color}55` }}
                     whileHover={{ scale: 1.2 }}
                   >
