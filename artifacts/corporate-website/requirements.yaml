@@ -1,0 +1,20 @@
+packages:
+  "framer-motion": "Required for complex scroll animations, entry reveals, and page transitions"
+  "react-hook-form": "Form state management for the contact form"
+  "@hookform/resolvers": "Zod validation integration for forms"
+  "zod": "Schema validation for forms"
+  "lucide-react": "Icons throughout the application"
+  "clsx": "Utility for conditionally joining classNames"
+  "tailwind-merge": "Utility to resolve Tailwind class conflicts"
+
+images:
+  - path: "artifacts/corporate-website/public/images/hero-bg.png"
+    description: "Premium abstract dark navy background with subtle glowing gold geometric lines and particles, highly professional corporate aesthetic, 8k resolution"
+    aspect_ratio: "16:9"
+  - path: "artifacts/corporate-website/public/images/logo.png"
+    description: "Minimalist corporate group logo mark in metallic gold on transparent background, sleek and modern"
+    aspect_ratio: "1:1"
+
+notes:
+  - Using generated API hooks from @workspace/api-client-react
+  - Simulating dark mode purely via CSS custom properties on :root to enforce the premium dark professional style globally

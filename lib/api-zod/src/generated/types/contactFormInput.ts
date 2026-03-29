@@ -5,9 +5,6 @@
  * Corporate Group Website API
  * OpenAPI spec version: 0.1.0
  */
-export interface HealthStatus {
-  status: string;
-}
 
 export interface ContactFormInput {
   name: string;
@@ -15,9 +12,4 @@ export interface ContactFormInput {
   subject: string;
   message: string;
   company?: string;
-}
-
-export interface ContactFormResponse {
-  success: boolean;
-  message: string;
 }
