@@ -78,9 +78,24 @@ Every package extends `tsconfig.base.json` which sets `composite: true`. The roo
 
 ## API Server Routes
 
+### Public
 - `GET /api/healthz` — Health check
 - `GET /api/sectors` — Fetch all sectors from DB (auto-seeds 6 default sectors if table is empty)
 - `POST /api/contact` — Contact form submission (validates with Zod, persists to contacts table)
+
+### Admin
+- `GET /api/admin/stats` — Dashboard KPI counts
+- `GET /api/admin/contacts` — List all contact inquiries (newest first)
+- `PATCH /api/admin/contacts/:id/read` — Mark inquiry as read (sets read_at timestamp)
+- `DELETE /api/admin/contacts/:id` — Delete inquiry
+- `GET /api/admin/sectors` — List sectors
+- `POST /api/admin/sectors` — Create sector
+- `PUT /api/admin/sectors/:id` — Update sector
+- `DELETE /api/admin/sectors/:id` — Delete sector
+- `GET /api/admin/jobs` — List job postings
+- `POST /api/admin/jobs` — Create job posting
+- `PUT /api/admin/jobs/:id` — Update job posting
+- `DELETE /api/admin/jobs/:id` — Delete job posting
 
 ## Packages
 
