@@ -1,10 +1,11 @@
 import { Router, type IRouter } from "express";
 import { SubmitContactBody, SubmitContactResponse } from "@workspace/api-zod";
-import { db, contactsTable } from "@workspace/db";
+import { db } from "@workspace/db"; 
+import { contacts } from "@workspace/db/schema"; 
 
 const router: IRouter = Router();
 
-router.post("/contact", async (req, res) => {
+router.post("/contact", async (req, res) => { // async add karein
   const result = SubmitContactBody.safeParse(req.body);
 
   if (!result.success) {
@@ -18,9 +19,18 @@ router.post("/contact", async (req, res) => {
   const { name, email, subject, message } = result.data;
 
   try {
-    await db.insert(contactsTable).values({ name, email, subject, message });
+    // --- DATABASE MEIN SAVE KAREIN ---
+    await db.insert(contacts).values({
+      name,
+      email,
+      subject: subject ?? null, 
+      message,
+    });
 
-    req.log.info({ name, email, subject }, "Contact form submission saved to DB");
+    req.log.info(
+      { name, email, subject },
+      "Contact form submission saved to database"
+    );
 
     const response = SubmitContactResponse.parse({
       success: true,
@@ -28,11 +38,11 @@ router.post("/contact", async (req, res) => {
     });
 
     res.json(response);
-  } catch (err) {
-    req.log.error({ err }, "Failed to save contact submission");
+  } catch (error) {
+    req.log.error(error, "Failed to save contact submission");
     res.status(500).json({
       success: false,
-      message: "Failed to save your message. Please try again later.",
+      message: "Internal server error. Please try again later.",
     });
   }
 });
