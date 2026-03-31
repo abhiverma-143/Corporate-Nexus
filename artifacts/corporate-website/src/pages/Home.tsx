@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { useEffect, useRef, useState } from "react";
 import {
   ArrowRight, Building2, Globe2, Users, TrendingUp, ShieldCheck,
-  Zap, Truck, Leaf, ChevronDown
+  Zap, Truck, ChevronDown
 } from "lucide-react";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { AnimatedCounter } from "@/components/ui/AnimatedCounter";
@@ -55,7 +55,7 @@ function GridLines() {
 }
 
 // ── Typewriter cycling text ────────────────────────────────────────────────
-const WORDS = ["Real Estate", "Technology", "Logistics", "Finance", "Construction", "Energy"];
+const WORDS = ["Real Estate", "Logistics", "Technology", "Energy"];
 
 function TypewriterCycle() {
   const [wordIndex, setWordIndex] = useState(0);
@@ -100,9 +100,9 @@ function TypewriterCycle() {
 
 // ── Marquee ticker ─────────────────────────────────────────────────────────
 const TICKER_ITEMS = [
-  "Real Estate", "•", "Logistics & Supply Chain", "•", "Technology & AI", "•",
-  "Construction", "•", "Financial Services", "•", "Energy & Resources", "•",
-  "45,000+ Employees", "•", "32 Countries", "•", "75 Years of Excellence", "•",
+  "Real Estate Development", "•", "Logistics & Supply Chain", "•", "Technology & AI", "•",
+  "Energy & Solar", "•", "Bhopal · Central India", "•", "150+ Projects Completed", "•",
+  "15 Years of Excellence", "•", "50+ Fleet Vehicles", "•", "98% Client Satisfaction", "•",
 ];
 
 function MarqueeTicker() {
@@ -215,7 +215,7 @@ const sectors = [
     name: "Real Estate",
     icon: Building2,
     color: "#d4af37",
-    desc: "Premium commercial and residential developments across 12 countries.",
+    desc: "High-end residential and commercial developments across Bhopal and Central India, built to international standards.",
     effect: "crossfade" as SlideEffect,
     images: [
       "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=800",
@@ -224,22 +224,22 @@ const sectors = [
     ],
   },
   {
-    name: "Financial Services",
-    icon: TrendingUp,
-    color: "#38bdf8",
-    desc: "Wealth management, corporate banking, and investment strategies.",
+    name: "Logistics",
+    icon: Truck,
+    color: "#34d399",
+    desc: "50+ vehicle fleet and regional warehousing delivering reliable supply chain solutions across Central India.",
     effect: "slide" as SlideEffect,
     images: [
-      "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&q=80&w=800",
-      "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&q=80&w=800",
-      "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=80&w=800",
+      "https://images.unsplash.com/photo-1586528116311-ad8ed7c83a7f?auto=format&fit=crop&q=80&w=800",
+      "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?auto=format&fit=crop&q=80&w=800",
+      "https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&q=80&w=800",
     ],
   },
   {
-    name: "Technology & Innovation",
-    icon: Zap,
+    name: "Technology",
+    icon: Globe2,
     color: "#a78bfa",
-    desc: "Pioneering enterprise software and AI-driven business solutions.",
+    desc: "Custom software, cloud migrations, and AI-driven solutions that accelerate enterprise digital transformation.",
     effect: "zoom" as SlideEffect,
     images: [
       "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800",
@@ -248,38 +248,14 @@ const sectors = [
     ],
   },
   {
-    name: "Logistics & Supply Chain",
-    icon: Truck,
-    color: "#34d399",
-    desc: "End-to-end global logistics networks spanning 4 continents.",
-    effect: "slide" as SlideEffect,
-    images: [
-      "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=800",
-      "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?auto=format&fit=crop&q=80&w=800",
-      "https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&q=80&w=800",
-    ],
-  },
-  {
-    name: "Construction",
-    icon: Globe2,
-    color: "#fb923c",
-    desc: "Landmark infrastructure projects redefining skylines worldwide.",
+    name: "Energy",
+    icon: Zap,
+    color: "#4ade80",
+    desc: "Solar power installations and sustainable energy consulting that cut costs and accelerate the path to net-zero.",
     effect: "crossfade" as SlideEffect,
     images: [
-      "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&q=80&w=800",
-      "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&q=80&w=800",
-      "https://images.unsplash.com/photo-1590012314607-cda9d9b699ae?auto=format&fit=crop&q=80&w=800",
-    ],
-  },
-  {
-    name: "Energy & Resources",
-    icon: Leaf,
-    color: "#4ade80",
-    desc: "Sustainable energy solutions powering the transition to net-zero.",
-    effect: "zoom" as SlideEffect,
-    images: [
+      "https://images.unsplash.com/photo-1466611653911-95081537e5b7?auto=format&fit=crop&q=80&w=800",
       "https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?auto=format&fit=crop&q=80&w=800",
-      "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&q=80&w=800",
       "https://images.unsplash.com/photo-1509391111902-de77d589c1f0?auto=format&fit=crop&q=80&w=800",
     ],
   },
@@ -395,9 +371,8 @@ export default function Home() {
             transition={{ duration: 0.9, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
             className="text-5xl md:text-7xl lg:text-8xl font-display font-bold text-foreground mb-6 leading-tight"
           >
-            Building the <br />
-            Future of{" "}
-            <TypewriterCycle />
+            Engineering Excellence<br />
+            <span className="text-gradient-gold">Across Diversified Sectors.</span>
           </motion.h1>
 
           <motion.p
@@ -406,8 +381,8 @@ export default function Home() {
             transition={{ duration: 0.8, delay: 0.7 }}
             className="mt-6 text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed"
           >
-            Aegis Group is a diversified global conglomerate driving sustainable growth,
-            innovation, and excellence across real estate, finance, technology, and infrastructure.
+            Aegis Group delivers innovative solutions in Real Estate, Logistics, and Technology
+            with a commitment to sustainability.
           </motion.p>
 
           <motion.div
@@ -458,10 +433,10 @@ export default function Home() {
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-border">
-            <StatCard label="Global Employees" value={45000} suffix="+" delay={0} icon={Users} />
-            <StatCard label="Countries Present" value={32} delay={0.15} icon={Globe2} />
-            <StatCard label="Years of Excellence" value={75} delay={0.3} icon={ShieldCheck} />
-            <StatCard label="Annual Revenue" value={12} prefix="$" suffix="B+" delay={0.45} icon={TrendingUp} />
+            <StatCard label="Projects Completed" value={150} suffix="+" delay={0} icon={ShieldCheck} />
+            <StatCard label="Years of Experience" value={15} suffix="+" delay={0.15} icon={TrendingUp} />
+            <StatCard label="Client Satisfaction" value={98} suffix="%" delay={0.3} icon={Users} />
+            <StatCard label="Fleet Vehicles" value={50} suffix="+" delay={0.45} icon={Truck} />
           </div>
         </div>
       </section>

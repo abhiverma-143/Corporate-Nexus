@@ -1,9 +1,6 @@
-import { Router, type IRouter } from "express";
-import { db, sectorsTable } from "@workspace/db";
+import { db, sectorsTable } from "./index.ts";
 
-const router: IRouter = Router();
-
-const DEFAULT_SECTORS = [
+const AEGIS_SECTORS = [
   {
     name: "Real Estate",
     description:
@@ -38,20 +35,20 @@ const DEFAULT_SECTORS = [
   },
 ];
 
-router.get("/sectors", async (req, res) => {
-  try {
-    let sectors = await db.select().from(sectorsTable);
+async function seed() {
+  console.log("🌱 Clearing existing sectors…");
+  await db.delete(sectorsTable);
 
-    if (sectors.length === 0) {
-      req.log.info("Sectors table empty — seeding Aegis Group default sectors");
-      sectors = await db.insert(sectorsTable).values(DEFAULT_SECTORS).returning();
-    }
+  console.log("🌱 Inserting Aegis Group sectors…");
+  const inserted = await db.insert(sectorsTable).values(AEGIS_SECTORS).returning();
 
-    res.json({ success: true, data: sectors });
-  } catch (err) {
-    req.log.error({ err }, "Failed to fetch sectors");
-    res.status(500).json({ success: false, message: "Failed to fetch sectors" });
-  }
+  console.log(`✅ Seeded ${inserted.length} sectors:`);
+  inserted.forEach((s) => console.log(`   • [${s.id}] ${s.name}`));
+
+  process.exit(0);
+}
+
+seed().catch((err) => {
+  console.error("❌ Seed failed:", err);
+  process.exit(1);
 });
-
-export default router;

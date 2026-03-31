@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import {
   Building2,
   Globe2,
@@ -10,6 +9,8 @@ import {
   Truck,
   HardHat,
   ArrowRight,
+  Factory,
+  Layers,
   type LucideIcon,
 } from "lucide-react";
 
@@ -20,6 +21,8 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Zap,
   Truck,
   HardHat,
+  Factory,
+  Layers,
 };
 
 interface Sector {
@@ -47,6 +50,30 @@ const itemVariants = {
     transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] },
   },
 };
+
+function SectorSkeleton({ reverse }: { reverse: boolean }) {
+  return (
+    <div
+      className={`flex flex-col ${
+        reverse ? "lg:flex-row-reverse" : "lg:flex-row"
+      } gap-12 items-center animate-pulse`}
+    >
+      <div className="w-full lg:w-1/2">
+        <div className="rounded-2xl bg-card border border-border h-[400px]" />
+      </div>
+      <div className="w-full lg:w-1/2 space-y-5">
+        <div className="w-16 h-16 rounded-xl bg-card border border-border" />
+        <div className="h-8 w-3/4 bg-card rounded" />
+        <div className="space-y-2">
+          <div className="h-4 bg-card rounded w-full" />
+          <div className="h-4 bg-card rounded w-5/6" />
+          <div className="h-4 bg-card rounded w-4/6" />
+        </div>
+        <div className="h-12 w-48 bg-card rounded mt-4" />
+      </div>
+    </div>
+  );
+}
 
 export default function Sectors() {
   const [sectors, setSectors] = useState<Sector[]>([]);
@@ -78,13 +105,15 @@ export default function Sectors() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeading
           title="Our Business Sectors"
-          subtitle="Engines of Global Economy"
+          subtitle="Engineering Excellence"
           className="mb-16"
         />
 
         {loading && (
-          <div className="flex items-center justify-center py-32">
-            <LoadingSpinner size="lg" label="Loading sectors…" />
+          <div className="space-y-24">
+            {[0, 1, 2, 3].map((i) => (
+              <SectorSkeleton key={i} reverse={i % 2 !== 0} />
+            ))}
           </div>
         )}
 
