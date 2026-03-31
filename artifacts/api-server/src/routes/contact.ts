@@ -1,9 +1,10 @@
 import { Router, type IRouter } from "express";
 import { SubmitContactBody, SubmitContactResponse } from "@workspace/api-zod";
+import { db, contactsTable } from "@workspace/db";
 
 const router: IRouter = Router();
 
-router.post("/contact", (req, res) => {
+router.post("/contact", async (req, res) => {
   const result = SubmitContactBody.safeParse(req.body);
 
   if (!result.success) {
@@ -16,17 +17,24 @@ router.post("/contact", (req, res) => {
 
   const { name, email, subject, message } = result.data;
 
-  req.log.info(
-    { name, email, subject },
-    "Contact form submission received"
-  );
+  try {
+    await db.insert(contactsTable).values({ name, email, subject, message });
 
-  const response = SubmitContactResponse.parse({
-    success: true,
-    message: `Thank you, ${name}! Your message has been received. We will get back to you at ${email} within 24-48 hours.`,
-  });
+    req.log.info({ name, email, subject }, "Contact form submission saved to DB");
 
-  res.json(response);
+    const response = SubmitContactResponse.parse({
+      success: true,
+      message: `Thank you, ${name}! Your message has been received. We will get back to you at ${email} within 24-48 hours.`,
+    });
+
+    res.json(response);
+  } catch (err) {
+    req.log.error({ err }, "Failed to save contact submission");
+    res.status(500).json({
+      success: false,
+      message: "Failed to save your message. Please try again later.",
+    });
+  }
 });
 
 export default router;

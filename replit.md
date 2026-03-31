@@ -79,7 +79,8 @@ Every package extends `tsconfig.base.json` which sets `composite: true`. The roo
 ## API Server Routes
 
 - `GET /api/healthz` — Health check
-- `POST /api/contact` — Contact form submission (validates name, email, subject, message)
+- `GET /api/sectors` — Fetch all sectors from DB (auto-seeds 6 default sectors if table is empty)
+- `POST /api/contact` — Contact form submission (validates with Zod, persists to contacts table)
 
 ## Packages
 

@@ -40,6 +40,12 @@
   --color-destructive-foreground: hsl(var(--destructive-foreground));
   --color-destructive-border: var(--destructive-border);
 
+  --color-corporate-gold: #d4af37;
+  --color-corporate-gold-light: #e6c875;
+  --color-corporate-gold-dark: #aa8529;
+  --color-deep-navy: #0a0f1e;
+  --color-deep-navy-card: #111827;
+
   --font-sans: 'DM Sans', sans-serif;
   --font-display: 'Cinzel', serif;
 
