@@ -22,7 +22,7 @@ router.post("/contact", async (req, res) => { // async add karein
     await db.insert(contactsTable).values({
       name,
       email,
-      subject: subject ?? null, 
+      subject: subject || "No Subject", 
       message,
     });
 
