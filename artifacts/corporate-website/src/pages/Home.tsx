@@ -74,28 +74,34 @@ const HEADLINE_WORDS_1 = ["Engineering", "Excellence"];
 const HEADLINE_WORDS_2 = ["Across", "Diversified", "Sectors."];
 
 function HeroHeadline() {
-  const wordVariant = {
-    hidden: { opacity: 0, y: 60, rotateX: 20 },
-    visible: (i: number) => ({
-      opacity: 1,
-      y: 0,
-      rotateX: 0,
-      transition: { duration: 0.75, delay: 0.3 + i * 0.12, ease: [0.22, 1, 0.36, 1] },
-    }),
-  };
   return (
-    <h1 className="font-display font-bold text-foreground mb-6 leading-[1.08]"
-      style={{ fontSize: "clamp(2.8rem, 8vw, 6.5rem)", perspective: "1000px" }}>
-      <div className="flex flex-wrap justify-center gap-x-4 gap-y-1">
+    <h1
+      className="max-w-4xl mx-auto font-display font-bold text-foreground mb-6 leading-[1.15] text-4xl sm:text-5xl md:text-6xl lg:text-7xl"
+      style={{ perspective: "1000px" }}
+    >
+      {/* Line 1 — white words with stagger */}
+      <div className="flex flex-wrap justify-center gap-x-[0.25em] gap-y-2">
         {HEADLINE_WORDS_1.map((w, i) => (
-          <motion.span key={w} custom={i} variants={wordVariant} initial="hidden" animate="visible">
+          <motion.span
+            key={w}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.25 + i * 0.12, ease: [0.22, 1, 0.36, 1] }}
+          >
             {w}
           </motion.span>
         ))}
       </div>
-      <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-gradient-gold">
+      {/* Line 2 — gold gradient words */}
+      <div className="flex flex-wrap justify-center gap-x-[0.25em] gap-y-2">
         {HEADLINE_WORDS_2.map((w, i) => (
-          <motion.span key={w} custom={HEADLINE_WORDS_1.length + i} variants={wordVariant} initial="hidden" animate="visible">
+          <motion.span
+            key={w}
+            className="bg-gradient-to-r from-[#d4af37] via-[#f2d06b] to-[#d4af37] bg-clip-text text-transparent"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.25 + (HEADLINE_WORDS_1.length + i) * 0.12, ease: [0.22, 1, 0.36, 1] }}
+          >
             {w}
           </motion.span>
         ))}
@@ -373,7 +379,7 @@ export default function Home() {
     <div className="min-h-screen">
 
       {/* ── HERO ──────────────────────────────────────────────────── */}
-      <section ref={heroRef} className="relative h-screen flex items-center justify-center overflow-hidden">
+      <section ref={heroRef} className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden pt-24 pb-16">
 
         {/* Parallax background */}
         <motion.div className="absolute inset-0 z-0" style={{ y: heroY }}>
@@ -401,7 +407,7 @@ export default function Home() {
 
         {/* Hero content */}
         <motion.div style={{ opacity: heroOpacity }}
-          className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center mt-16">
+          className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
 
           {/* Badge */}
           <motion.div
