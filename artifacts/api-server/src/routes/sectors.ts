@@ -38,7 +38,7 @@ const DEFAULT_SECTORS = [
   },
 ];
 
-router.get("/", async (req, res) => {
+router.get("/sectors", async (req, res) => {
   try {
     let sectors = await db.select().from(sectorsTable);
 
