@@ -81,7 +81,7 @@ export default function Sectors() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(`/api/sectors`)
+    fetch(`https://corporate-nexus-api.onrender.com/api/sectors`)
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json();
