@@ -1,7 +1,6 @@
 import { Router, type IRouter } from "express";
 import { SubmitContactBody, SubmitContactResponse } from "@workspace/api-zod";
-import { db } from "@workspace/db"; 
-import { contacts } from "@workspace/db/schema"; 
+import { db, contactsTable } from "@workspace/db";
 
 const router: IRouter = Router();
 
@@ -20,7 +19,7 @@ router.post("/contact", async (req, res) => { // async add karein
 
   try {
     // --- DATABASE MEIN SAVE KAREIN ---
-    await db.insert(contacts).values({
+    await db.insert(contactsTable).values({
       name,
       email,
       subject: subject ?? null, 
